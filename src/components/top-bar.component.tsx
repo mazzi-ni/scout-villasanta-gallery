@@ -1,25 +1,106 @@
-import { Box, Flex, Heading, Image, Select, Spacer } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Image,
+  HStack,
+  IconButton,
+  Button,
+  useDisclosure,
+  useColorModeValue,
+  Collapse,
+  Stack,
+} from '@chakra-ui/react'
+import { HamburgerIcon, CloseIcon, ArrowForwardIcon } from '@chakra-ui/icons'
+import { Link } from "react-router-dom";
+import { DarkModeSwitcher } from "./dark-mode-switcher.component"
 
-export const TopBar = ({ onFilter }: { onFilter: (v: any) => void }) => (
-  <Flex direction={"row"} alignItems={"center"} justifyContent={"center"}>
-    <Box display={"flex"} alignItems={"center"}>
-      <Image
-        width={{ sm: "30px", md: "60px", lg: "70px" }}
-        src="android-chrome-384x384.png"
-        paddingRight={"7px"}
-      />
-      <Heading size={{ sm: "md", md: "lg", lg: "lg" }}>
-        Foto Villasanta 1
-      </Heading>
+interface Props {
+  children: React.ReactNode
+}
+
+const Links = [
+  { name: 'Home', link: 'home' }, 
+  { name: 'Foto', link: 'foto' }, 
+  { name: 'Progetto Educativo', link: 'peg' }, 
+  { name: 'Contatti', link: 'contatti' }, 
+]
+
+const NavLink = ({ nav_link }: { nav_link: any }) => {
+  const { name, link } = nav_link;
+
+  return (
+    <Box
+      as="a"
+      px={2}
+      py={1}
+      rounded={'md'}
+      _hover={{
+        textDecoration: 'none',
+        bg: useColorModeValue('gray.200', 'gray.700'),
+      }}>
+      <Link to={link}>
+        {name}
+      </Link>
     </Box>
-    <Spacer />
-    <Box>
-      <Select placeholder="Tutte le branche" size={"sm"} onChange={onFilter}>
-        <option value="LC">Branca LC</option>
-        <option value="EG">Branca EG</option>
-        <option value="RS">Branca RS</option>
-        <option value="COCA">Coca</option>
-      </Select>
-    </Box>
-  </Flex>
-);
+  )
+}
+
+export const TopBar = ( ) => {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  return (
+    <>
+      <Box 
+        bg={useColorModeValue('gray.100', 'gray.900')} 
+        px={4}
+        rounded={"lg"}
+        pos={"fixed"}
+        zIndex={"sticky"}
+        w={"80%"}
+        style={{ boxShadow: "0px 0px 30px 0px rgba(0,0,0,.22)",  }}
+        paddingX={"15px"}
+        paddingY={"10px"}
+        >
+        <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
+          <IconButton
+            size={'md'}
+            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+            aria-label={'Open Menu'}
+            display={{ md: 'none' }}
+            onClick={isOpen ? onClose : onOpen}
+          />
+          <HStack spacing={8} alignItems={'center'}>
+            <Image
+              width={{ sm: "40px", md: "50px", lg: "60px" }}
+              src="VILLASANTA1_Colore_HiRes.png"
+              paddingLeft={"7px"}
+            />
+            <HStack as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
+              {Links.map((link) => (
+                <NavLink key={link.link} nav_link={link}></NavLink>
+              ))}
+            </HStack>
+          </HStack>
+          <Button 
+            colorScheme='teal'
+            rightIcon={<ArrowForwardIcon />}
+            onClick={ () => console.log("sas") }
+            >
+            Login
+          </Button>
+        </Flex>
+
+        {isOpen ? (
+          <Box pb={4} display={{ md: 'none' }}>
+            <Stack as={'nav'} spacing={4}>
+              {Links.map((link) => (
+                <NavLink key={link.link} nav_link={link}></NavLink>
+              ))}
+            </Stack>
+          </Box>
+        ) : null}
+      </Box>
+
+    </>
+  )
+}

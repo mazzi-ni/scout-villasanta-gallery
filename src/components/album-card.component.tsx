@@ -36,7 +36,7 @@ export const AlbumCard = ({ album }: { album: Album }) => {
       _hover={{
         color: "teal.500",
         cursor: "pointer",
-        transitionDuration: '0.2s',
+        transitionDuration: "0.2s",
         transitionTimingFunction: "ease-in-out",
         transform: "scale(1.02)",
       }}
