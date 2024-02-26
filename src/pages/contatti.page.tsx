@@ -45,10 +45,10 @@ export default function Contact() {
           // bg="#02054B"
           // color="white"
           borderRadius="lg"
-          m={{ sm: 4, md: 16, lg: 10 }}
+          m={{ sm: 4, md: 4, lg: 10 }}
           p={{ sm: 5, md: 5, lg: 16 }}>
           <Box p={4}>
-            <Wrap spacing={{ base: 20, sm: 3, md: 5, lg: 20 }}>
+            <Wrap spacing={{ base: 10, sm: 3, md: 5, lg: 20 }}>
               <WrapItem>
                 <Box>
                   <Heading marginY='10px'>Info</Heading>
@@ -113,7 +113,7 @@ export default function Contact() {
                 </Box>
               </WrapItem>
               <WrapItem>
-                <Box bg="white" borderRadius="lg">
+                <Flex bg="white" borderRadius="lg" alignItems='center' justifyContent='center'>
                   <Box m={8} color="#0B0E3F">
                     <VStack spacing={5}>
                       <FormControl id="name">
@@ -151,7 +151,7 @@ export default function Contact() {
                       </FormControl>
                     </VStack>
                   </Box>
-                </Box>
+                </Flex>
               </WrapItem>
             </Wrap>
           </Box>

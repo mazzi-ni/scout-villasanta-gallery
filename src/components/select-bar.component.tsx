@@ -35,11 +35,11 @@ export const SelectBar = ({ options, onFilter } : SelectBarProps) => {
     zIndex="sticky"
     >
     <Box 
-      bg={useColorModeValue('gray.100', 'gray.900')} 
+      bg={useColorModeValue('white', '#343f53')} 
       px={4}
       rounded={"40px"}
       minW={"300px"}
-      style={{ boxShadow: "0px 0px 30px 0px rgba(0,0,0,.22)",  }}
+      style={{ boxShadow: "0px 0px 30px 0px rgba(0,0,0,.22)" }}
       padding={"2px"}
     >
 

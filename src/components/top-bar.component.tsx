@@ -51,7 +51,7 @@ export const TopBar = ( ) => {
   return (
     <>
       <Box 
-        bg={useColorModeValue('gray.100', 'gray.900')} 
+        bg={useColorModeValue('white', '#343f53')} 
         px={4}
         rounded={"lg"}
         pos={"fixed"}
@@ -81,13 +81,7 @@ export const TopBar = ( ) => {
               ))}
             </HStack>
           </HStack>
-          <Button 
-            colorScheme='teal'
-            rightIcon={<ArrowForwardIcon />}
-            onClick={ () => console.log("sas") }
-            >
-            Login
-          </Button>
+          <DarkModeSwitcher />
         </Flex>
 
         {isOpen ? (
