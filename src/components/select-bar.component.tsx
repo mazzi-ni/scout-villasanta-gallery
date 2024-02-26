@@ -12,12 +12,6 @@ import {
 } from "@chakra-ui/react";
 import { BrancaColorMapping, EBranca } from "../types/album.type";
 
-const brache = [
-  "LC",
-  "EG",
-  "RS",
-  "COCA",
-]
 
 type SelectBarProps = {
   options: { label: string; value: String; selected: boolean }[];

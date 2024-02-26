@@ -16,6 +16,7 @@ import Home from "./pages/home.page";
 import Foto from "./pages/foto.page";
 import Contact from "./pages/contatti.page";
 import Error404 from "./pages/error.page";
+import Peg from "./pages/peg.page";
 
 moment.locale("it");
 
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: "contatti",
         element: <Contact/>,
+      },
+      {
+        path: "peg",
+        element: <Peg/>,
       },
     ]
   },
