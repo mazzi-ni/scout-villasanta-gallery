@@ -24,9 +24,9 @@ const capitalize = (s: string) => s && s[0].toUpperCase() + s.slice(1);
 
 export const AlbumCard = ({ album }: { album: Album }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const thumbCoverSrc =
-    album.album_cover.slice(0, album.album_cover.indexOf("=w")) +
-    "=w500-h350-c";
+  const thumbCoverSrc = album.album_cover;
+    // album.album_cover.slice(0, album.album_cover.indexOf("=w")) +
+    // "=w500-h350-c";
   const date = capitalize(moment(album.date, "DD/MM/YYYY").format("MMMM YYYY"));
 
   return (

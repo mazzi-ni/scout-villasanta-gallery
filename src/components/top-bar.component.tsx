@@ -4,19 +4,14 @@ import {
   Image,
   HStack,
   IconButton,
-  Button,
   useDisclosure,
   useColorModeValue,
-  Collapse,
   Stack,
 } from '@chakra-ui/react'
 import { HamburgerIcon, CloseIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 import { Link } from "react-router-dom";
 import { DarkModeSwitcher } from "./dark-mode-switcher.component"
 
-interface Props {
-  children: React.ReactNode
-}
 
 const Links = [
   { name: 'Home', link: 'home' }, 

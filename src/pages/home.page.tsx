@@ -1,10 +1,7 @@
 import React from "react";
 import {
   Box,
-  Center,
-  Flex,
   Heading,
-  useColorModeValue
 } from "@chakra-ui/react";
 
 

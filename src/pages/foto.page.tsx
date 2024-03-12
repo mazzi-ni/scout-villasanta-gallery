@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Center,
-  Flex,
-} from "@chakra-ui/react";
+import { Box, Center, Flex } from "@chakra-ui/react";
 import axios from "axios";
 import { Album } from "../types/album.type";
 import { Loader } from "../components/loader.component";
@@ -11,11 +7,11 @@ import { AlbumGallery } from "../components/album-gallery.component";
 import { SelectBar } from "../components/select-bar.component";
 
 const options = [
-  { label: 'Tutte', value: 'tutte', selected: true },
-  { label: 'LC', value: 'LC', selected: false },
-  { label: 'EG', value: 'EG', selected: false },
-  { label: 'RS', value: 'RS', selected: false },
-  { label: 'COCA', value: 'COCA', selected: false },
+  { label: "Tutte", value: "tutte", selected: true },
+  { label: "LC", value: "LC", selected: false },
+  { label: "EG", value: "EG", selected: false },
+  { label: "RS", value: "RS", selected: false },
+  { label: "COCA", value: "COCA", selected: false },
 ];
 
 function Foto() {
@@ -42,15 +38,14 @@ function Foto() {
       ) : (
         <>
           <AlbumGallery albums={visibleAlbums} />
-          <SelectBar 
+          <SelectBar
             options={options}
+            setAlbums={setVisibleAlbums}
             onFilter={(v) => {
               console.log(v);
-              if (v === 'tutte') setVisibleAlbums(albums);
+              if (v === "tutte") setVisibleAlbums(albums);
               else
-                setVisibleAlbums(
-                  albums.filter((album) => album.branca === v)
-                );
+                setVisibleAlbums(albums.filter((album) => album.branca === v));
             }}
           />
         </>
