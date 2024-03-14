@@ -48,7 +48,7 @@ export const AlbumCard = ({ album }: { album: Album }) => {
       <CardBody>
         <Skeleton isLoaded={!isLoading} w="100%" h="321px" borderRadius="lg">
           <Image
-            src={thumbCoverSrc}
+            src={album.album_cover}
             alt={album.name}
             width="100%"
             h="321px"

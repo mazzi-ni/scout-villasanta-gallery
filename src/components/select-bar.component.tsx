@@ -74,55 +74,46 @@ export const SelectBar = ({
   const placeRef = React.useRef<HTMLInputElement>(null);
   const [countStep, setCountStep] = useState(0);
 
-  const handleNextStep = () => {
-    if (countStep < step.length - 1) {
-      if (!step[countStep].handler()) {
-        setCountStep(0);
-        setNewalbum({
-          name: "",
-          album_cover: "",
-          album_link: "",
-          date: Date.now().toString(),
-          branca: EBranca.EG,
-          place: "villasanta(MB)",
-        });
-        return;
-      }
-      setCountStep(countStep + 1);
-    }
+  const onCloseModal = () => {
+    setNewalbum({
+      name: "",
+      album_cover: "",
+      album_link: "",
+      date: Date.now().toString(),
+      branca: EBranca.EG,
+      place: "villasanta(MB)",
+    });
+    setLoading(true);
+    setCountStep(0);
+    onClose();
+  };
 
+  const handleNextStep = () => {
     if (countStep === step.length - 1) {
       step[countStep].handler();
-      onClose();
-      setCountStep(0);
+      onCloseModal();
+      return;
+    }
+
+    if (countStep < step.length - 1) {
+      if (!step[countStep].handler()) {
+        onCloseModal();
+        return;
+      }
+
+      setCountStep(countStep + 1);
     }
   };
 
   const handlePreviousStep = () => {
     if (countStep === 0) {
-      setNewalbum({
-        name: "",
-        album_cover: "",
-        album_link: "",
-        date: Date.now().toString(),
-        branca: EBranca.EG,
-        place: "villasanta(MB)",
-      });
+      onCloseModal();
       return;
     }
     if (countStep > 0) {
       setCountStep(countStep - 1);
     }
   };
-
-  // let album: Album = {
-  //   name: "",
-  //   album_cover: "",
-  //   album_link: "",
-  //   date: Date.now().toString(),
-  //   branca: EBranca.EG,
-  //   place: "villasanta(MB)",
-  // };
 
   const step = [
     {
@@ -143,7 +134,7 @@ export const SelectBar = ({
           (album) => album.album_link === urlRef.current?.value
         );
         if (urlRef.current?.value === "") {
-          onClose();
+          // onCloseModal();
           toast({
             title: "Inserire un link",
             status: "error",
@@ -155,7 +146,7 @@ export const SelectBar = ({
         }
 
         if (albumExists) {
-          onClose();
+          // onCloseModal();
           toast({
             title: "Album già esiste",
             status: "error",
@@ -165,10 +156,12 @@ export const SelectBar = ({
           });
           return false;
         }
+
         setNewalbum((album) => ({
           ...album,
           album_link: urlRef.current?.value || "",
         }));
+
         return true;
       },
     },
@@ -176,8 +169,7 @@ export const SelectBar = ({
       title: "Select Image Cover",
       content: () => {
         let id = newalbum.album_link.replace("https://photos.app.goo.gl/", "");
-        // console.log(id);
-        // console.log(album);
+
         axios
           .get("https://fetch-google-album.netlify.app/api/" + id)
           .then((res) => {
@@ -202,18 +194,17 @@ export const SelectBar = ({
                       src={img}
                       loading="lazy"
                       alt={`album-cover ${index}`}
-                      onError={(e) => console.log(img)}
+                      onError={() => console.log(img)}
                       border={
                         selectedImage === index ? "5px solid #3182ce" : ""
                       }
-                      onClick={(e) => {
+                      onClick={() => {
                         console.log(img);
                         setSelectedImage(index);
                         setNewalbum((album) => ({
                           ...album,
                           album_cover: img,
                         }));
-                        // setCountStep(countStep + 1);
                       }}
                       _hover={{
                         cursor: "pointer",
@@ -232,6 +223,13 @@ export const SelectBar = ({
       },
       handler: () => {
         if (newalbum.album_cover === "") {
+          toast({
+            title: "Selezionare una copertina",
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+            position: "bottom-right",
+          });
           return false;
         }
         return true;
@@ -288,6 +286,12 @@ export const SelectBar = ({
               name="date-input"
               date={date}
               onDateChange={setDate}
+              configs={{
+                dateFormat: "dd-MM-yyyy",
+                dayNames: "abcdefg".split(""), // length of 7
+                monthNames: "ABCDEFGHIJKL".split(""), // length of 12
+                firstDayOfWeek: 2, // default is 0, the dayNames[0], which is Sunday if you don't specify your own dayNames,
+              }}
             />
           </SimpleGrid>
         </>
@@ -390,8 +394,7 @@ export const SelectBar = ({
           isCentered
           isOpen={isOpen}
           onClose={() => {
-            onClose();
-            setCountStep(0);
+            onCloseModal();
           }}
           scrollBehavior={"inside"}
           size={"xl"}
@@ -413,7 +416,7 @@ export const SelectBar = ({
               <Button
                 mr={3}
                 onClick={handleNextStep}
-                // disabled={countStep === step.length}
+                disabled={countStep === step.length}
               >
                 {countStep === step.length - 1 ? "Add" : "Next"}
               </Button>
