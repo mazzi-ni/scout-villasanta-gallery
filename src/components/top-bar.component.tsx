@@ -25,7 +25,6 @@ const NavLink = ({ nav_link }: { nav_link: any }) => {
 
   return (
     <Box
-      as="a"
       px={2}
       py={1}
       rounded={'md'}

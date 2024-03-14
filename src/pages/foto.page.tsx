@@ -41,6 +41,7 @@ function Foto() {
           <SelectBar
             options={options}
             setAlbums={setVisibleAlbums}
+            albums={visibleAlbums}
             onFilter={(v) => {
               console.log(v);
               if (v === "tutte") setVisibleAlbums(albums);

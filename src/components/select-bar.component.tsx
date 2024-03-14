@@ -4,10 +4,10 @@ import {
   Flex,
   Button,
   IconButton,
-  Text,
   FormControl,
   FormLabel,
   Input,
+  Image,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -17,86 +17,322 @@ import {
   ModalCloseButton,
   useColorModeValue,
   useDisclosure,
-  useBreakpointValue,
+  SimpleGrid,
+  MenuItem,
+  MenuButton,
+  Menu,
+  MenuList,
+  useToast,
+  CircularProgress,
+  Center,
 } from "@chakra-ui/react";
-import { AddIcon } from "@chakra-ui/icons";
+import { AddIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { Album, BrancaColorMapping, EBranca } from "../types/album.type";
 import axios from "axios";
-
-// type SelectBarProps = {
-//   options: { label: string; value: String; selected: boolean }[];
-//   onFilter: (value: String) => void;
-// };
+import { AlbumCard } from "./album-card.component";
+import { Loader } from "./loader.component";
+import { abort } from "process";
 
 type SelectBarProps = {
   options: { label: string; value: string; selected: boolean }[];
   setAlbums: React.Dispatch<React.SetStateAction<Album[]>>; // Add this line
   onFilter: (value: string) => void;
+  albums: Album[];
 };
 
-export const SelectBar = ({ options, setAlbums, onFilter }: SelectBarProps) => {
-  const OverlayOne = () => (
-    <ModalOverlay
-      bg="blackAlpha.300"
-      backdropFilter="blur(10px) hue-rotate(90deg)"
-    />
-  );
+const OverlayOne = () => (
+  <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+);
 
-  const OverlayTwo = () => (
-    <ModalOverlay
-      bg="none"
-      backdropFilter="auto"
-      backdropInvert="80%"
-      backdropBlur="2px"
-    />
-  );
-
+export const SelectBar = ({
+  options,
+  setAlbums,
+  onFilter,
+  albums,
+}: SelectBarProps) => {
   const [currentOption, setCurrentOption] = useState(options[0].value);
+  const [overlay, setOverlay] = useState(<OverlayOne />);
+  const [date, setDate] = useState(new Date());
+  const [images, setImages] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedImage, setSelectedImage] = useState<number>();
+  const [newalbum, setNewalbum] = useState<Album>({
+    name: "",
+    album_cover: "",
+    album_link: "",
+    date: Date.now().toString(),
+    branca: EBranca.EG,
+    place: "villasanta(MB)",
+  });
+
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [overlay, setOverlay] = React.useState(<OverlayOne />);
+  const toast = useToast();
+
   const urlRef = React.useRef<HTMLInputElement>(null);
   const nameRef = React.useRef<HTMLInputElement>(null);
+  const placeRef = React.useRef<HTMLInputElement>(null);
+  const [countStep, setCountStep] = useState(0);
+
+  const handleNextStep = () => {
+    if (countStep < step.length - 1) {
+      if (!step[countStep].handler()) {
+        setCountStep(0);
+        setNewalbum({
+          name: "",
+          album_cover: "",
+          album_link: "",
+          date: Date.now().toString(),
+          branca: EBranca.EG,
+          place: "villasanta(MB)",
+        });
+        return;
+      }
+      setCountStep(countStep + 1);
+    }
+
+    if (countStep === step.length - 1) {
+      step[countStep].handler();
+      onClose();
+      setCountStep(0);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (countStep === 0) {
+      setNewalbum({
+        name: "",
+        album_cover: "",
+        album_link: "",
+        date: Date.now().toString(),
+        branca: EBranca.EG,
+        place: "villasanta(MB)",
+      });
+      return;
+    }
+    if (countStep > 0) {
+      setCountStep(countStep - 1);
+    }
+  };
+
+  // let album: Album = {
+  //   name: "",
+  //   album_cover: "",
+  //   album_link: "",
+  //   date: Date.now().toString(),
+  //   branca: EBranca.EG,
+  //   place: "villasanta(MB)",
+  // };
+
+  const step = [
+    {
+      title: "Album Url",
+      content: () => (
+        <>
+          <FormControl mt={4}>
+            <FormLabel>Album Url</FormLabel>
+            <Input
+              ref={urlRef}
+              placeholder="https://photos.app.goo.gl/LHR6y2ayCAZnHSfy7"
+            />
+          </FormControl>
+        </>
+      ),
+      handler: () => {
+        const albumExists = albums.some(
+          (album) => album.album_link === urlRef.current?.value
+        );
+        if (urlRef.current?.value === "") {
+          onClose();
+          toast({
+            title: "Inserire un link",
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+            position: "bottom-right",
+          });
+          return false;
+        }
+
+        if (albumExists) {
+          onClose();
+          toast({
+            title: "Album già esiste",
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+            position: "bottom-right",
+          });
+          return false;
+        }
+        setNewalbum((album) => ({
+          ...album,
+          album_link: urlRef.current?.value || "",
+        }));
+        return true;
+      },
+    },
+    {
+      title: "Select Image Cover",
+      content: () => {
+        let id = newalbum.album_link.replace("https://photos.app.goo.gl/", "");
+        // console.log(id);
+        // console.log(album);
+        axios
+          .get("https://fetch-google-album.netlify.app/api/" + id)
+          .then((res) => {
+            setImages(res.data);
+            setLoading(false);
+          })
+          .catch((err) => console.log(err.status));
+
+        return (
+          <>
+            {loading ? (
+              <Center>
+                <CircularProgress isIndeterminate color="green.300" />
+              </Center>
+            ) : (
+              <Box height={"100%"}>
+                <SimpleGrid columns={3} spacing={4}>
+                  {images.map((img: string, index: number) => (
+                    <Image
+                      key={index}
+                      rounded={"2xl"}
+                      src={img}
+                      loading="lazy"
+                      alt={`album-cover ${index}`}
+                      onError={(e) => console.log(img)}
+                      border={
+                        selectedImage === index ? "5px solid #3182ce" : ""
+                      }
+                      onClick={(e) => {
+                        console.log(img);
+                        setSelectedImage(index);
+                        setNewalbum((album) => ({
+                          ...album,
+                          album_cover: img,
+                        }));
+                        // setCountStep(countStep + 1);
+                      }}
+                      _hover={{
+                        cursor: "pointer",
+                        transitionDuration: "0.2s",
+                        transitionTimingFunction: "ease-in-out",
+                        transform: "scale(1.02)",
+                        boxShadow: "0px 0px 30px 0px rgba(0,0,0,.22)",
+                      }}
+                    />
+                  ))}
+                </SimpleGrid>
+              </Box>
+            )}
+          </>
+        );
+      },
+      handler: () => {
+        if (newalbum.album_cover === "") {
+          return false;
+        }
+        return true;
+      },
+    },
+    {
+      title: "Dati Album",
+      content: () => (
+        <>
+          <SimpleGrid
+            columns={2}
+            spacing="2"
+            alignItems={"end"}
+            templateColumns="2fr 1fr"
+          >
+            <FormControl mt={2}>
+              <FormLabel>Nome</FormLabel>
+              <Input ref={nameRef} placeholder="Campo Scout 2021" />
+            </FormControl>
+
+            <Menu>
+              <MenuButton
+                as={Button}
+                rightIcon={<ChevronDownIcon />}
+                colorScheme={BrancaColorMapping[newalbum.branca]}
+              >
+                {newalbum.branca}
+              </MenuButton>
+              <MenuList>
+                {(Object.values(EBranca) as EBranca[]).map(
+                  (branca: EBranca) => (
+                    <MenuItem
+                      key={branca}
+                      onClick={() => {
+                        setNewalbum((album) => ({
+                          ...album,
+                          branca: branca,
+                        }));
+                      }}
+                    >
+                      {branca}
+                    </MenuItem>
+                  )
+                )}
+              </MenuList>
+            </Menu>
+
+            <FormControl mt={2}>
+              <FormLabel>Place</FormLabel>
+              <Input ref={placeRef} placeholder="Villasanta (MB)" />
+            </FormControl>
+
+            <SingleDatepicker
+              name="date-input"
+              date={date}
+              onDateChange={setDate}
+            />
+          </SimpleGrid>
+        </>
+      ),
+      handler: () => {
+        setNewalbum((album) => ({
+          ...album,
+          name: nameRef.current?.value as string,
+          place: placeRef.current?.value as string,
+          date: date.toLocaleString("it-IT"),
+        }));
+
+        return true;
+      },
+    },
+    {
+      title: "preview new Album",
+      content: () => (
+        <Box>
+          <AlbumCard album={newalbum} />
+        </Box>
+      ),
+      handler: () => {
+        axios
+          .post("https://sheetdb.io/api/v1/szlv36k1mncvl", {
+            id: "INCREMENT",
+            ...newalbum,
+          })
+          .then((res) => console.log(res.status))
+          .catch((err) => {
+            console.log(err);
+            return false;
+          });
+
+        console.log(newalbum);
+        setAlbums((albums) => [newalbum, ...albums]);
+        onClose();
+        return true;
+      },
+    },
+  ];
 
   const handleSelect = (value: string) => {
     setCurrentOption(value);
     onFilter(value);
-  };
-
-  const handleAdd = () => {
-    if (!urlRef.current || !nameRef.current) {
-      console.log("Input reference is null");
-      return;
-    }
-
-    const fetch_album_url = "https://fetch-google-album.netlify.app/api/";
-    const url = urlRef.current.value;
-    const name = nameRef.current.value;
-    const id = url.replace("https://photos.app.goo.gl/", "");
-
-    axios
-      .get(fetch_album_url + id)
-      .then((res) => {
-        let album: Album = {
-          name: name,
-          album_cover: res.data[0],
-          album_link: url,
-          date: Date.now().toString(),
-          branca: EBranca.EG,
-          place: "villasanta(MB)",
-        };
-
-        console.log(album);
-        setAlbums((prevAlbums) => [album, ...prevAlbums]);
-
-        axios
-          .post("https://sheetdb.io/api/v1/szlv36k1mncvl", {
-            id: "INCREMENT",
-            ...album,
-          })
-          .then((res) => console.log(res.status))
-          .catch((err) => console.log(err));
-      })
-      .catch((err) => console.log(err));
   };
 
   return (
@@ -150,34 +386,36 @@ export const SelectBar = ({ options, setAlbums, onFilter }: SelectBarProps) => {
           }}
         />
 
-        <Modal isCentered isOpen={isOpen} onClose={onClose}>
+        <Modal
+          isCentered
+          isOpen={isOpen}
+          onClose={() => {
+            onClose();
+            setCountStep(0);
+          }}
+          scrollBehavior={"inside"}
+          size={"xl"}
+        >
           {overlay}
           <ModalContent>
-            <ModalHeader>Modal Title</ModalHeader>
+            <ModalHeader>{step[countStep].title}</ModalHeader>
             <ModalCloseButton />
-            <ModalBody pb={6}>
-              <FormControl>
-                <FormLabel>Name</FormLabel>
-                <Input ref={nameRef} placeholder="Campo Estivo 2021" />
-              </FormControl>
-
-              <FormControl mt={4}>
-                <FormLabel>Album Url</FormLabel>
-                <Input
-                  ref={urlRef}
-                  placeholder="https://photos.app.goo.gl/LHR6y2ayCAZnHSfy7"
-                />
-              </FormControl>
-            </ModalBody>
+            <ModalBody pb={6}>{step[countStep].content()}</ModalBody>
             <ModalFooter>
               <Button
                 mr={3}
-                onClick={() => {
-                  handleAdd();
-                  onClose();
-                }}
+                onClick={handlePreviousStep}
+                disabled={countStep === 0}
+                hidden={countStep === 0}
               >
-                Add
+                Previous
+              </Button>
+              <Button
+                mr={3}
+                onClick={handleNextStep}
+                // disabled={countStep === step.length}
+              >
+                {countStep === step.length - 1 ? "Add" : "Next"}
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -186,3 +424,18 @@ export const SelectBar = ({ options, setAlbums, onFilter }: SelectBarProps) => {
     </Flex>
   );
 };
+
+// <ModalHeader>New Album</ModalHeader>
+// <ModalCloseButton />
+// <ModalBody pb={6}>{step[3].content("0") as JSX.Element}</ModalBody>
+// <ModalFooter>
+//   <Button
+//     mr={3}
+//     onClick={() => {
+//       handleAdd();
+//       onClose();
+//     }}
+//   >
+//     Add
+//   </Button>
+// </ModalFooter>
