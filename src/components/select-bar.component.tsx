@@ -286,11 +286,16 @@ export const SelectBar = ({
               name="date-input"
               date={date}
               onDateChange={setDate}
+              propsConfigs={{
+                calendarPanelProps: {
+                  contentProps: {
+                    borderWidth: 0,
+                  },
+                },
+              }}
               configs={{
                 dateFormat: "dd-MM-yyyy",
-                dayNames: "abcdefg".split(""), // length of 7
-                monthNames: "ABCDEFGHIJKL".split(""), // length of 12
-                firstDayOfWeek: 2, // default is 0, the dayNames[0], which is Sunday if you don't specify your own dayNames,
+                firstDayOfWeek: 1,
               }}
             />
           </SimpleGrid>
