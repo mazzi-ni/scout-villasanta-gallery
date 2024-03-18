@@ -31,8 +31,8 @@ import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { Album, BrancaColorMapping, EBranca } from "../types/album.type";
 import axios from "axios";
 import { AlbumCard } from "./album-card.component";
-import { Loader } from "./loader.component";
-import { abort } from "process";
+// import { Loader } from "./loader.component";
+// import { abort } from "process";
 
 type SelectBarProps = {
   options: { label: string; value: string; selected: boolean }[];
@@ -134,7 +134,7 @@ export const SelectBar = ({
           (album) => album.album_link === urlRef.current?.value
         );
         if (urlRef.current?.value === "") {
-          // onCloseModal();
+          onCloseModal();
           toast({
             title: "Inserire un link",
             status: "error",
@@ -146,7 +146,7 @@ export const SelectBar = ({
         }
 
         if (albumExists) {
-          // onCloseModal();
+          onCloseModal();
           toast({
             title: "Album già esiste",
             status: "error",
@@ -173,10 +173,14 @@ export const SelectBar = ({
         axios
           .get("https://fetch-google-album.netlify.app/api/" + id)
           .then((res) => {
-            setImages(res.data);
+            let images = res.data;
+            setImages(images.splice(0, images.length - 2));
             setLoading(false);
           })
-          .catch((err) => console.log(err.status));
+          .catch((err) => {
+            setLoading(false);
+            console.log(err.status);
+          });
 
         return (
           <>
@@ -194,6 +198,9 @@ export const SelectBar = ({
                       src={img}
                       loading="lazy"
                       alt={`album-cover ${index}`}
+                      fallback={
+                        <Box bg={`teal.100`} h="321px" borderRadius="lg" />
+                      }
                       onError={() => console.log(img)}
                       border={
                         selectedImage === index ? "5px solid #3182ce" : ""
@@ -223,6 +230,7 @@ export const SelectBar = ({
       },
       handler: () => {
         if (newalbum.album_cover === "") {
+          // onCloseModal();
           toast({
             title: "Selezionare una copertina",
             status: "error",
@@ -331,9 +339,9 @@ export const SelectBar = ({
             return false;
           });
 
-        console.log(newalbum);
+        // console.log(newalbum);
         setAlbums((albums) => [newalbum, ...albums]);
-        onClose();
+        onCloseModal();
         return true;
       },
     },
@@ -432,18 +440,3 @@ export const SelectBar = ({
     </Flex>
   );
 };
-
-// <ModalHeader>New Album</ModalHeader>
-// <ModalCloseButton />
-// <ModalBody pb={6}>{step[3].content("0") as JSX.Element}</ModalBody>
-// <ModalFooter>
-//   <Button
-//     mr={3}
-//     onClick={() => {
-//       handleAdd();
-//       onClose();
-//     }}
-//   >
-//     Add
-//   </Button>
-// </ModalFooter>
